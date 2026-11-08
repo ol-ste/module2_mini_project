@@ -11,7 +11,7 @@ int main(void) {
 
     while (1) {
         while (application_has_pending_events()) {
-            application_process_events();
+            application_process_next_event();
         }
 
         __disable_irq();

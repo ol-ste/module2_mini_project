@@ -77,7 +77,16 @@ bool application_has_pending_events() {
     return !event_queue.is_empty();
 }
 
-void application_process_events() {
-    // empty realisation for now
+void application_process_next_event() {
+    event_t evt;
+    if (event_queue.get_event(&evt) == 0) {
+        switch (evt.source) {
+        case SRC_THERMAL_DECOY:
+            thermal_decoys_ctrl.handle_event(evt.type);
+            break;
+        default:
+            break;
+        }
+    }
     return;
 }

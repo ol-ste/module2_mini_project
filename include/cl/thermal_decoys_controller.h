@@ -3,6 +3,10 @@
 #include "cl/event.h"
 #include "cl/event_queue.h"
 #include "dl/button.h"
+typedef enum {
+    ST_IDLE,
+    ST_FIRING,
+} thermal_decoys_state_t;
 
 class ThermalDecoysController {
 private:
@@ -12,12 +16,20 @@ private:
     volatile uint32_t activation_time_ms = 0;
 
     // volatile??
-    volatile bool     current_state             = false;
-    volatile uint32_t current_state_duration_ms = 0;
-    volatile uint8_t  decoys_left               = 0;
+    volatile thermal_decoys_state_t current_state = ST_IDLE;
+
+    volatile bool     is_firing          = false;
+    volatile uint32_t action_duration_ms = 0;
+    volatile uint8_t  actions_left       = 0;
 
     const uint16_t DECOY_ACTIVE_DURATION_MS = 100;
     const uint16_t DECOY_TOTAL_COUNT        = 3;
+
+    void enter_idle();
+    void enter_firing();
+
+    void set_action_duration(uint32_t ms);
+    void continue_fire();
 
 public:
     ThermalDecoysController(Button *trigger_value, EventQueue *event_queue_value);
