@@ -14,7 +14,7 @@ typedef enum {
 
 typedef enum {
     SRC_UNKNOWN = 0,
-    SRC_THERMAL_DECOY,
+    SRC_THERMAL_DECOYS_CTRL,
 } even_source_t;
 
 typedef struct {

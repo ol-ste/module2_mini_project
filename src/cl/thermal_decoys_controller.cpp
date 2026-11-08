@@ -22,7 +22,7 @@ void ThermalDecoysController::handle_trigger() {
 void ThermalDecoysController::handle_timer_tick() {
     if (activation_time_ms != 0 && --activation_time_ms == 0u) {
         if (GPIO_PIN_SET == HAL_GPIO_ReadPin(trigger->port, trigger->pin)) {
-            event_queue->post_event(SRC_THERMAL_DECOY, EVT_TRG_HELD);
+            event_queue->post_event(SRC_THERMAL_DECOYS_CTRL, EVT_TRG_HELD);
         }
 
         __HAL_GPIO_EXTI_CLEAR_IT(trigger->pin);
@@ -31,7 +31,7 @@ void ThermalDecoysController::handle_timer_tick() {
     }
 
     if (action_duration_ms != 0 && --action_duration_ms == 0u) {
-        event_queue->post_event(SRC_THERMAL_DECOY, EVT_TIMEOUT);
+        event_queue->post_event(SRC_THERMAL_DECOYS_CTRL, EVT_TIMEOUT);
     }
 }
 
