@@ -1,6 +1,5 @@
 #pragma once
 
-#include "cl/event.h"
 #include "cl/event_queue.h"
 #include "dl/button.h"
 #include "dl/led.h"

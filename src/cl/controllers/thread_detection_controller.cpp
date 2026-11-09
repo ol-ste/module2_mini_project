@@ -1,4 +1,4 @@
-#include "cl/thread_detection_controller.h"
+#include "cl/controllers/thread_detection_controller.h"
 #include "cl/config.h"
 #include "cl/event.h"
 #include "cl/event_queue.h"

@@ -1,4 +1,4 @@
-#include "cl/thermal_decoys_controller.h"
+#include "cl/controllers/thermal_decoys_controller.h"
 #include "cl/config.h"
 #include "cl/event.h"
 #include "cl/event_queue.h"
