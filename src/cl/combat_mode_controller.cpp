@@ -25,15 +25,6 @@ void CombatModeController::handle_trigger(uint16_t trigger_pin) {
     action_recognition_time_ms = TRIGGER_HELD_MS;
 }
 
-void CombatModeController::enable_trigger_irq() {
-    short_action_detected      = false;
-    action_recognition_time_ms = 0;
-
-    __HAL_GPIO_EXTI_CLEAR_IT(trigger->pin);
-    HAL_NVIC_ClearPendingIRQ(trigger->irqn);
-    HAL_NVIC_EnableIRQ(trigger->irqn);
-}
-
 void CombatModeController::handle_timer_tick() {
     if (action_recognition_time_ms != 0) {
         --action_recognition_time_ms;
@@ -49,10 +40,8 @@ void CombatModeController::handle_timer_tick() {
             } else {
                 if (short_action_detected) {
                     event_queue->post_event(SRC_COMBAT_MODE_CTRL, EVT_TRG_ACTIVATED);
-                    enable_trigger_irq();
-                } else {
-                    enable_trigger_irq();
                 }
+                enable_trigger_irq();
             }
         }
     }
@@ -95,36 +84,26 @@ void CombatModeController::handle_event(const event_t *e) {
     }
 }
 
-void CombatModeController::set_action_duration(uint32_t ms) {
-    uint32_t primask = __get_PRIMASK();
-    __disable_irq();
-    action_duration_ms = ms;
-    __set_PRIMASK(primask);
-}
-
 void CombatModeController::enter_idle() {
-    current_state      = ST_CM_IDLE;
-    is_firing          = false;
-    action_duration_ms = 0;
-    actions_left       = 0;
+    reset_internal_states();
 
+    current_state = ST_CM_IDLE;
     action_indicator->off();
 }
 
 void CombatModeController::enter_target_locked() {
-    current_state      = ST_CM_TARGET_LOCKED;
-    is_firing          = false;
-    action_duration_ms = 0;
-    actions_left       = 0;
+    reset_internal_states();
 
+    current_state = ST_CM_TARGET_LOCKED;
     action_indicator->on();
 }
 
 void CombatModeController::enter_firing() {
+    reset_internal_states();
+
     current_state = ST_CM_FIRING;
     actions_left  = ACTIONS_TOTAL_COUNT * 2 + 1;
     is_firing     = true;
-
     continue_fire();
 }
 
@@ -133,4 +112,28 @@ void CombatModeController::continue_fire() {
     is_firing = !is_firing;
     is_firing ? action_indicator->on() : action_indicator->off();
     set_action_duration(DEFAULT_ACTION_DURATION_MS);
+}
+
+void CombatModeController::enable_trigger_irq() {
+    short_action_detected      = false;
+    action_recognition_time_ms = 0;
+
+    __HAL_GPIO_EXTI_CLEAR_IT(trigger->pin);
+    HAL_NVIC_ClearPendingIRQ(trigger->irqn);
+    HAL_NVIC_EnableIRQ(trigger->irqn);
+}
+
+void CombatModeController::reset_internal_states() {
+    is_firing                  = false;
+    action_recognition_time_ms = 0;
+    action_duration_ms         = 0;
+    actions_left               = 0;
+    short_action_detected      = false;
+}
+
+void CombatModeController::set_action_duration(uint32_t ms) {
+    uint32_t primask = __get_PRIMASK();
+    __disable_irq();
+    action_duration_ms = ms;
+    __set_PRIMASK(primask);
 }

@@ -31,9 +31,7 @@ void ThermalDecoysController::handle_timer_tick() {
             event_queue->post_event(SRC_THERMAL_DECOYS_CTRL, EVT_TRG_HELD);
         }
 
-        __HAL_GPIO_EXTI_CLEAR_IT(trigger->pin);
-        HAL_NVIC_ClearPendingIRQ(trigger->irqn);
-        HAL_NVIC_EnableIRQ(trigger->irqn);
+        enable_trigger_irq();
     }
 
     if (action_duration_ms != 0 && --action_duration_ms == 0u) {
@@ -67,23 +65,16 @@ void ThermalDecoysController::handle_event(const event_t *e) {
     }
 }
 
-void ThermalDecoysController::set_action_duration(uint32_t ms) {
-    uint32_t primask = __get_PRIMASK();
-    __disable_irq();
-    action_duration_ms = ms;
-    __set_PRIMASK(primask);
-}
-
 void ThermalDecoysController::enter_idle() {
-    current_state      = ST_TD_IDLE;
-    is_firing          = false;
-    action_duration_ms = 0;
-    actions_left       = 0;
+    reset_internal_states();
 
+    current_state = ST_TD_IDLE;
     decoy->close();
 }
 
 void ThermalDecoysController::enter_firing() {
+    reset_internal_states();
+
     current_state = ST_TD_FIRING;
     actions_left  = DECOY_TOTAL_COUNT * 2;
     continue_fire();
@@ -94,4 +85,26 @@ void ThermalDecoysController::continue_fire() {
     is_firing = !is_firing;
     is_firing ? decoy->open() : decoy->close();
     set_action_duration(is_firing ? DECOY_ACTIVE_DURATION_MS : DEFAULT_ACTION_DURATION_MS);
+}
+
+void ThermalDecoysController::enable_trigger_irq() {
+    activation_time_ms = 0;
+
+    __HAL_GPIO_EXTI_CLEAR_IT(trigger->pin);
+    HAL_NVIC_ClearPendingIRQ(trigger->irqn);
+    HAL_NVIC_EnableIRQ(trigger->irqn);
+}
+
+void ThermalDecoysController::reset_internal_states() {
+    is_firing          = false;
+    activation_time_ms = 0;
+    action_duration_ms = 0;
+    actions_left       = 0;
+}
+
+void ThermalDecoysController::set_action_duration(uint32_t ms) {
+    uint32_t primask = __get_PRIMASK();
+    __disable_irq();
+    action_duration_ms = ms;
+    __set_PRIMASK(primask);
 }

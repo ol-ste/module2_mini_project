@@ -30,8 +30,10 @@ private:
     void enter_idle();
     void enter_firing();
 
-    void set_action_duration(uint32_t ms);
     void continue_fire();
+    void enable_trigger_irq();
+    void reset_internal_states();
+    void set_action_duration(uint32_t ms);
 
 public:
     ThermalDecoysController(Button *trigger_value, Relay *decoy_value, EventQueue *event_queue_value);

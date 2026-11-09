@@ -32,10 +32,10 @@ private:
     void enter_target_locked();
     void enter_firing();
 
-    void enable_trigger_irq();
-
-    void set_action_duration(uint32_t ms);
     void continue_fire();
+    void enable_trigger_irq();
+    void reset_internal_states();
+    void set_action_duration(uint32_t ms);
 
 public:
     CombatModeController(Button *trigger_value, Led *action_indicator_value, EventQueue *event_queue_value);
