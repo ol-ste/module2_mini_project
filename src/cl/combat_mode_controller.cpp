@@ -107,6 +107,8 @@ void CombatModeController::enter_idle() {
     is_firing          = false;
     action_duration_ms = 0;
     actions_left       = 0;
+
+    action_indicator->off();
 }
 
 void CombatModeController::enter_target_locked() {

@@ -79,6 +79,8 @@ void ThermalDecoysController::enter_idle() {
     is_firing          = false;
     action_duration_ms = 0;
     actions_left       = 0;
+
+    decoy->close();
 }
 
 void ThermalDecoysController::enter_firing() {
