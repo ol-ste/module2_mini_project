@@ -12,10 +12,7 @@ typedef enum {
     EVT_TIMEOUT,
 } event_type_t;
 
-typedef enum {
-    SRC_UNKNOWN = 0,
-    SRC_THERMAL_DECOYS_CTRL,
-} even_source_t;
+typedef enum { SRC_UNKNOWN = 0, SRC_THERMAL_DECOYS_CTRL, SRC_COMBAT_MODE_CTRL } even_source_t;
 
 typedef struct {
     even_source_t source;

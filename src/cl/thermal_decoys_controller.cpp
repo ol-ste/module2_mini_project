@@ -10,6 +10,7 @@ ThermalDecoysController::ThermalDecoysController(Button     *trigger_value,
 
 void ThermalDecoysController::init() {
     trigger->init();
+    decoy->init();
 }
 
 bool ThermalDecoysController::can_handle_trigger(uint16_t trigger_pin) {
@@ -90,5 +91,5 @@ void ThermalDecoysController::continue_fire() {
     actions_left--;
     is_firing = !is_firing;
     is_firing ? decoy->open() : decoy->close();
-    set_action_duration(is_firing ? DECOY_ACTIVE_DURATION_MS : DEFAULT_DURATION_MS);
+    set_action_duration(is_firing ? DECOY_ACTIVE_DURATION_MS : DEFAULT_ACTION_DURATION_MS);
 }
