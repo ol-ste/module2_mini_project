@@ -18,7 +18,6 @@ private:
 
     volatile uint32_t activation_time_ms = 0;
 
-    // volatile??
     volatile thermal_decoys_state_t current_state = ST_TD_IDLE;
 
     volatile bool     is_firing          = false;

@@ -17,8 +17,8 @@ private:
     Led        *action_indicator;
     EventQueue *event_queue;
 
-    volatile uint32_t action_recognition_time = 0;
-    volatile bool     short_action_detected   = false;
+    volatile uint32_t action_recognition_time_ms = 0;
+    volatile bool     short_action_detected      = false;
 
     volatile combat_mode_state_t current_state = ST_CM_IDLE;
 

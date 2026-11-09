@@ -22,12 +22,12 @@ void CombatModeController::handle_trigger(uint16_t trigger_pin) {
         return;
     }
     HAL_NVIC_DisableIRQ(trigger->irqn);
-    action_recognition_time = TRIGGER_HELD_MS;
+    action_recognition_time_ms = TRIGGER_HELD_MS;
 }
 
 void CombatModeController::enable_trigger_irq() {
-    short_action_detected   = false;
-    action_recognition_time = 0;
+    short_action_detected      = false;
+    action_recognition_time_ms = 0;
 
     __HAL_GPIO_EXTI_CLEAR_IT(trigger->pin);
     HAL_NVIC_ClearPendingIRQ(trigger->irqn);
@@ -35,12 +35,12 @@ void CombatModeController::enable_trigger_irq() {
 }
 
 void CombatModeController::handle_timer_tick() {
-    if (action_recognition_time != 0) {
-        --action_recognition_time;
-        if (TRIGGER_HELD_MS - action_recognition_time >= TRIGGER_ACTIVATED_MS) {
+    if (action_recognition_time_ms != 0) {
+        --action_recognition_time_ms;
+        if (TRIGGER_HELD_MS - action_recognition_time_ms >= TRIGGER_ACTIVATED_MS) {
             GPIO_PinState pinState = HAL_GPIO_ReadPin(trigger->port, trigger->pin);
             if (pinState == GPIO_PIN_SET) {
-                if (action_recognition_time == 0) {
+                if (action_recognition_time_ms == 0) {
                     event_queue->post_event(SRC_COMBAT_MODE_CTRL, EVT_TRG_HELD);
                     enable_trigger_irq();
                 } else {
@@ -70,6 +70,29 @@ void CombatModeController::handle_event(const event_t *e) {
     if (!can_handle_event(e)) {
         return;
     }
+    switch (current_state) {
+    case ST_CM_IDLE:
+        if (EVT_TRG_HELD == e->type) {
+            enter_target_locked();
+        }
+        break;
+    case ST_CM_TARGET_LOCKED:
+        if (EVT_TRG_ACTIVATED == e->type) {
+            enter_firing();
+        }
+        break;
+    case ST_CM_FIRING:
+        if (EVT_TIMEOUT == e->type) {
+            if (0u == actions_left) {
+                enter_idle();
+            } else {
+                continue_fire();
+            }
+        }
+        break;
+    default:
+        break;
+    }
 }
 
 void CombatModeController::set_action_duration(uint32_t ms) {
@@ -97,7 +120,8 @@ void CombatModeController::enter_target_locked() {
 
 void CombatModeController::enter_firing() {
     current_state = ST_CM_FIRING;
-    actions_left  = ACTIONS_TOTAL_COUNT * 2;
+    actions_left  = ACTIONS_TOTAL_COUNT * 2 + 1;
+    is_firing     = true;
 
     continue_fire();
 }
