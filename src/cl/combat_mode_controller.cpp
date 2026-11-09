@@ -80,14 +80,14 @@ void CombatModeController::set_action_duration(uint32_t ms) {
 }
 
 void CombatModeController::enter_idle() {
-    current_state      = ST_IDLE;
+    current_state      = ST_CM_IDLE;
     is_firing          = false;
     action_duration_ms = 0;
     actions_left       = 0;
 }
 
 void CombatModeController::enter_target_locked() {
-    current_state      = ST_TARGET_LOCKED;
+    current_state      = ST_CM_TARGET_LOCKED;
     is_firing          = false;
     action_duration_ms = 0;
     actions_left       = 0;
@@ -96,7 +96,7 @@ void CombatModeController::enter_target_locked() {
 }
 
 void CombatModeController::enter_firing() {
-    current_state = ST_FIRING;
+    current_state = ST_CM_FIRING;
     actions_left  = ACTIONS_TOTAL_COUNT * 2;
 
     continue_fire();

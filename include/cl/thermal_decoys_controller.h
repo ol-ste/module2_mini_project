@@ -6,8 +6,8 @@
 #include "dl/relay.h"
 
 typedef enum {
-    ST_IDLE,
-    ST_FIRING,
+    ST_TD_IDLE,
+    ST_TD_FIRING,
 } thermal_decoys_state_t;
 
 class ThermalDecoysController {
@@ -19,7 +19,7 @@ private:
     volatile uint32_t activation_time_ms = 0;
 
     // volatile??
-    volatile thermal_decoys_state_t current_state = ST_IDLE;
+    volatile thermal_decoys_state_t current_state = ST_TD_IDLE;
 
     volatile bool     is_firing          = false;
     volatile uint32_t action_duration_ms = 0;

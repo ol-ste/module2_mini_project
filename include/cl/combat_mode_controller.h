@@ -6,9 +6,9 @@
 #include "dl/led.h"
 
 typedef enum {
-    ST_IDLE,
-    ST_TARGET_LOCKED,
-    ST_FIRING,
+    ST_CM_IDLE,
+    ST_CM_TARGET_LOCKED,
+    ST_CM_FIRING,
 } combat_mode_state_t;
 
 class CombatModeController {
@@ -20,7 +20,7 @@ private:
     volatile uint32_t action_recognition_time = 0;
     volatile bool     short_action_detected   = false;
 
-    volatile combat_mode_state_t current_state = ST_IDLE;
+    volatile combat_mode_state_t current_state = ST_CM_IDLE;
 
     volatile bool     is_firing          = false;
     volatile uint32_t action_duration_ms = 0;

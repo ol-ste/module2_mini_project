@@ -50,12 +50,12 @@ void ThermalDecoysController::handle_event(const event_t *e) {
         return;
     }
     switch (current_state) {
-    case ST_IDLE:
+    case ST_TD_IDLE:
         if (EVT_TRG_HELD == e->type) {
             enter_firing();
         }
         break;
-    case ST_FIRING:
+    case ST_TD_FIRING:
         if (EVT_TIMEOUT == e->type) {
             if (0u == actions_left) {
                 enter_idle();
@@ -75,14 +75,14 @@ void ThermalDecoysController::set_action_duration(uint32_t ms) {
 }
 
 void ThermalDecoysController::enter_idle() {
-    current_state      = ST_IDLE;
+    current_state      = ST_TD_IDLE;
     is_firing          = false;
     action_duration_ms = 0;
     actions_left       = 0;
 }
 
 void ThermalDecoysController::enter_firing() {
-    current_state = ST_FIRING;
+    current_state = ST_TD_FIRING;
     actions_left  = DECOY_TOTAL_COUNT * 2;
     continue_fire();
 }
