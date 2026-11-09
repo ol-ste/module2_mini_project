@@ -1,7 +1,7 @@
 #include "dl/button.h"
 
 Button::Button(GPIO_TypeDef *portValue, uint16_t pinValue, uint32_t priorityValue, IRQn_Type irqnValue)
-    : port(portValue), pin(pinValue), priority(priorityValue), irqn(irqnValue) {}
+    : priority(priorityValue), port(portValue), pin(pinValue), irqn(irqnValue) {}
 
 void Button::init() {
     GPIO_InitTypeDef gpio = {0};

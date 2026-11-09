@@ -3,6 +3,8 @@
 #include "cl/event.h"
 #include "cl/event_queue.h"
 #include "dl/button.h"
+#include "dl/relay.h"
+
 typedef enum {
     ST_IDLE,
     ST_FIRING,
@@ -11,6 +13,7 @@ typedef enum {
 class ThermalDecoysController {
 private:
     Button     *trigger;
+    Relay      *decoy;
     EventQueue *event_queue;
 
     volatile uint32_t activation_time_ms = 0;
@@ -32,13 +35,15 @@ private:
     void continue_fire();
 
 public:
-    ThermalDecoysController(Button *trigger_value, EventQueue *event_queue_value);
+    ThermalDecoysController(Button *trigger_value, Relay *decoy_value, EventQueue *event_queue_value);
 
     void init();
 
     bool can_handle_trigger(uint16_t trigger_pin);
+    void handle_trigger(uint16_t trigger_pin);
 
-    void handle_trigger();
+    bool can_handle_event(const event_t *e);
+    void handle_event(const event_t *e);
+
     void handle_timer_tick();
-    void handle_event(event_type_t type);
 };

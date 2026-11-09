@@ -3,8 +3,10 @@
 #include "cl/event.h"
 #include "cl/event_queue.h"
 
-ThermalDecoysController::ThermalDecoysController(Button *trigger_value, EventQueue *event_queue_value)
-    : trigger(trigger_value), event_queue(event_queue_value) {}
+ThermalDecoysController::ThermalDecoysController(Button     *trigger_value,
+                                                 Relay      *decoy_value,
+                                                 EventQueue *event_queue_value)
+    : trigger(trigger_value), decoy(decoy_value), event_queue(event_queue_value) {}
 
 void ThermalDecoysController::init() {
     trigger->init();
@@ -14,7 +16,10 @@ bool ThermalDecoysController::can_handle_trigger(uint16_t trigger_pin) {
     return trigger->pin == trigger_pin;
 }
 
-void ThermalDecoysController::handle_trigger() {
+void ThermalDecoysController::handle_trigger(uint16_t trigger_pin) {
+    if (!can_handle_trigger(trigger_pin)) {
+        return;
+    }
     HAL_NVIC_DisableIRQ(trigger->irqn);
     activation_time_ms = TRIGGER_HELD_MS;
 }
@@ -35,15 +40,22 @@ void ThermalDecoysController::handle_timer_tick() {
     }
 }
 
-void ThermalDecoysController::handle_event(event_type_t type) {
+bool ThermalDecoysController::can_handle_event(const event_t *e) {
+    return e->source == SRC_THERMAL_DECOYS_CTRL;
+}
+
+void ThermalDecoysController::handle_event(const event_t *e) {
+    if (!can_handle_event(e)) {
+        return;
+    }
     switch (current_state) {
     case ST_IDLE:
-        if (EVT_TRG_HELD == type) {
+        if (EVT_TRG_HELD == e->type) {
             enter_firing();
         }
         break;
     case ST_FIRING:
-        if (EVT_TIMEOUT == type) {
+        if (EVT_TIMEOUT == e->type) {
             if (0u == actions_left) {
                 enter_idle();
             } else {
@@ -77,6 +89,6 @@ void ThermalDecoysController::enter_firing() {
 void ThermalDecoysController::continue_fire() {
     actions_left--;
     is_firing = !is_firing;
-    // send signal to relay
+    is_firing ? decoy->open() : decoy->close();
     set_action_duration(is_firing ? DECOY_ACTIVE_DURATION_MS : DEFAULT_DURATION_MS);
 }

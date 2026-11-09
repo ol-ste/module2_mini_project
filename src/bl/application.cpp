@@ -3,14 +3,16 @@
 #include "cl/event_queue.h"
 #include "cl/thermal_decoys_controller.h"
 #include "dl/button.h"
+#include "dl/relay.h"
 #include "stm32f4xx_hal.h"
 
 static TIM_HandleTypeDef htim2;
 static EventQueue        event_queue;
 
 static Button thermal_decoys_trg(THERMAL_DECOY_TRG_PORT, THERMAL_DECOY_TRG_PIN, 1, THERMAL_DECOY_TRG_IRQN);
+static Relay  thermal_decoy(RELAY_PORT, RELAY_PIN);
 
-static ThermalDecoysController thermal_decoys_ctrl(&thermal_decoys_trg, &event_queue);
+static ThermalDecoysController thermal_decoys_ctrl(&thermal_decoys_trg, &thermal_decoy, &event_queue);
 
 extern "C" void Error_Handler(void);
 
@@ -53,7 +55,7 @@ void TIM2_IRQHandler(void) {
 
 void HAL_GPIO_EXTI_Callback(uint16_t pin) {
     if (thermal_decoys_ctrl.can_handle_trigger(pin)) {
-        thermal_decoys_ctrl.handle_trigger();
+        thermal_decoys_ctrl.handle_trigger(pin);
     }
 }
 
@@ -80,12 +82,8 @@ bool application_has_pending_events() {
 void application_process_next_event() {
     event_t evt;
     if (event_queue.get_event(&evt) == 0) {
-        switch (evt.source) {
-        case SRC_THERMAL_DECOY:
-            thermal_decoys_ctrl.handle_event(evt.type);
-            break;
-        default:
-            break;
+        if (thermal_decoys_ctrl.can_handle_event(&evt)) {
+            thermal_decoys_ctrl.handle_event(&evt);
         }
     }
     return;
