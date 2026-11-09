@@ -55,7 +55,7 @@ void ThreadDetectionController::handle_timer_tick() {
 }
 
 bool ThreadDetectionController::can_handle_event(const event_t *e) {
-    return e->source == SRC_COMBAT_MODE_CTRL || (e->source == SRC_THERMAL_DECOYS_CTRL && e->type == EVT_TRG_HELD);
+    return e->source == SRC_THREAD_DETECTION_CTRL || (e->source == SRC_THERMAL_DECOYS_CTRL && e->type == EVT_TRG_HELD);
 }
 
 void ThreadDetectionController::handle_event(const event_t *e) {
@@ -69,7 +69,9 @@ void ThreadDetectionController::handle_event(const event_t *e) {
         }
         break;
     case ST_THD_LOW_THREAD_DETECTED:
-        if (EVT_TRG_HELD == e->type) {
+        if (EVT_TIMEOUT == e->type) {
+            continue_low_thread_indicating();
+        } else if (EVT_TRG_HELD == e->type) {
             enter_high_thread();
         }
         break;

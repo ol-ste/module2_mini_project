@@ -39,7 +39,7 @@ static void clocks_init() {
 }
 
 static void timer_init(TIM_HandleTypeDef *htim, TIM_TypeDef *tim_instance, IRQn_Type tim_irqn, uint32_t priority) {
-    htim->Instance               = TIM2;
+    htim->Instance               = tim_instance;
     htim->Init.Prescaler         = 1600 - 1; // 16 MHz / 1600 = 10 kHz
     htim->Init.CounterMode       = TIM_COUNTERMODE_UP;
     htim->Init.Period            = 10 - 1; // 10 ticks at 10 kHz = 1 ms interrupt
