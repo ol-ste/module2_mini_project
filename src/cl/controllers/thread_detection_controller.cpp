@@ -62,6 +62,7 @@ void ThreadDetectionController::handle_event(const event_t *e) {
     if (!can_handle_event(e)) {
         return;
     }
+    bool thermalDecoyFired = e->source == SRC_THERMAL_DECOYS_CTRL && e->type == EVT_TRG_HELD;
     switch (current_state) {
     case ST_THD_IDLE:
         if (EVT_TRG_ACTIVATED == e->type) {
@@ -69,14 +70,15 @@ void ThreadDetectionController::handle_event(const event_t *e) {
         }
         break;
     case ST_THD_LOW_THREAD_DETECTED:
-        if (EVT_TIMEOUT == e->type) {
+        if (thermalDecoyFired) {
+            enter_idle();
+        } else if (EVT_TIMEOUT == e->type) {
             continue_low_thread_indicating();
         } else if (EVT_TRG_HELD == e->type) {
             enter_high_thread();
         }
         break;
     case ST_THD_HIGH_THREAD_DETECTED:
-        bool thermalDecoyFired = e->source == SRC_THERMAL_DECOYS_CTRL && e->type == EVT_TRG_HELD;
         if (thermalDecoyFired) {
             enter_idle();
         }
@@ -88,6 +90,7 @@ void ThreadDetectionController::enter_idle() {
     current_state = ST_THD_IDLE;
     reset_internal_states();
 
+    low_thread_indicator->off();
     high_thread_indicator->off();
 }
 
